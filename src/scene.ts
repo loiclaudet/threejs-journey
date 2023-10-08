@@ -1,11 +1,11 @@
 import * as THREE from "three"
+import gsap from "gsap"
 
 export const setupScene = (canvasElement: HTMLCanvasElement) => {
   const scene = new THREE.Scene()
 
   // Objects
   const group = new THREE.Group()
-  group.position.y = 1
   scene.add(group)
 
   const cube1 = new THREE.Mesh(
@@ -54,4 +54,18 @@ export const setupScene = (canvasElement: HTMLCanvasElement) => {
     sizes.height = Math.min(600, window.innerHeight, window.innerWidth)
     renderer.setSize(sizes.width, sizes.height)
   })
+
+  gsap.to(group.position, { duration: 1, delay: 1, x: 2 })
+  gsap.to(group.position, { duration: 1, delay: 2, x: 0 })
+
+  // const clock = new THREE.Clock()
+
+  const tick = () => {
+    // const elapsedTime = clock.getElapsedTime()
+    // group.position.y = Math.sin(elapsedTime)
+    // group.position.x = Math.cos(elapsedTime)
+    renderer.render(scene, camera)
+    requestAnimationFrame(tick)
+  }
+  tick()
 }
