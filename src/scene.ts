@@ -1,45 +1,45 @@
 import * as THREE from "three"
-import gsap from "gsap"
 
 export const setupScene = (canvasElement: HTMLCanvasElement) => {
   const scene = new THREE.Scene()
 
-  // Objects
-  const group = new THREE.Group()
-  scene.add(group)
+  const sizes = {
+    width: Math.min(800, window.innerWidth),
+    height: Math.min(600, window.innerWidth, window.innerHeight),
+  }
 
-  const cube1 = new THREE.Mesh(
+  const cursor = {
+    x: 0,
+    y: 0,
+  }
+
+  window.addEventListener("mousemove", (event: MouseEvent) => {
+    cursor.x = event.clientX / sizes.width - 0.5
+    cursor.y = -(event.clientY / sizes.height - 0.5)
+  })
+
+  // Objects
+  const cube = new THREE.Mesh(
     new THREE.BoxGeometry(1, 1, 1),
     new THREE.MeshBasicMaterial({ color: 0xff0000 })
   )
-  group.add(cube1)
-
-  const cube2 = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-  )
-  cube2.position.x = -2
-  group.add(cube2)
-
-  const cube3 = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial({ color: 0xffff00 })
-  )
-  cube3.position.x = 2
-  group.add(cube3)
-
-  const sizes = {
-    width: Math.min(800, window.innerWidth),
-    height: Math.min(600, window.innerHeight, window.innerWidth),
-  }
+  scene.add(cube)
 
   // helper
   const axesHelper = new THREE.AxesHelper()
   scene.add(axesHelper)
 
   // camera
-  const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height)
-  camera.position.z = 5
+  const camera = new THREE.PerspectiveCamera(
+    75,
+    sizes.width / sizes.height,
+    0.1,
+    100
+  )
+
+  camera.position.z = 3
+  camera.lookAt(cube.position)
+
   scene.add(camera)
 
   // renderer
@@ -51,19 +51,17 @@ export const setupScene = (canvasElement: HTMLCanvasElement) => {
 
   window.addEventListener("resize", () => {
     sizes.width = Math.min(800, window.innerWidth)
-    sizes.height = Math.min(600, window.innerHeight, window.innerWidth)
+    sizes.height = Math.min(600, window.innerHeight)
     renderer.setSize(sizes.width, sizes.height)
   })
 
-  gsap.to(group.position, { duration: 1, delay: 1, x: 2 })
-  gsap.to(group.position, { duration: 1, delay: 2, x: 0 })
-
-  // const clock = new THREE.Clock()
-
   const tick = () => {
-    // const elapsedTime = clock.getElapsedTime()
-    // group.position.y = Math.sin(elapsedTime)
-    // group.position.x = Math.cos(elapsedTime)
+    camera.position.x = Math.sin(cursor.x * Math.PI * 2) * 3
+    camera.position.z = Math.cos(cursor.x * Math.PI * 2) * 3
+    camera.position.y = cursor.y * 3
+
+    camera.lookAt(cube.position)
+
     renderer.render(scene, camera)
     requestAnimationFrame(tick)
   }
