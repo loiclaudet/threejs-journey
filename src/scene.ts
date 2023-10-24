@@ -1,4 +1,5 @@
 import * as THREE from "three"
+import { OrbitControls } from "three/addons/controls/OrbitControls.js"
 
 export const setupScene = (canvasElement: HTMLCanvasElement) => {
   const scene = new THREE.Scene()
@@ -42,6 +43,10 @@ export const setupScene = (canvasElement: HTMLCanvasElement) => {
 
   scene.add(camera)
 
+  const controls = new OrbitControls(camera, canvasElement)
+  controls.enableDamping = true
+  controls.update()
+
   // renderer
   const renderer = new THREE.WebGLRenderer({
     canvas: canvasElement,
@@ -56,11 +61,7 @@ export const setupScene = (canvasElement: HTMLCanvasElement) => {
   })
 
   const tick = () => {
-    camera.position.x = Math.sin(cursor.x * Math.PI * 2) * 3
-    camera.position.z = Math.cos(cursor.x * Math.PI * 2) * 3
-    camera.position.y = cursor.y * 3
-
-    camera.lookAt(cube.position)
+    controls.update()
 
     renderer.render(scene, camera)
     requestAnimationFrame(tick)
