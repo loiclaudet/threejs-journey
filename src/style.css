@@ -46,3 +46,9 @@ h1 {
     background-color: #f9f9f9;
   }
 }
+
+.webgl {
+  position: fixed;
+  inset: 0;
+  overscroll-behavior: none;
+}

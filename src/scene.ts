@@ -5,8 +5,8 @@ export const setupScene = (canvasElement: HTMLCanvasElement) => {
   const scene = new THREE.Scene()
 
   const sizes = {
-    width: Math.min(800, window.innerWidth),
-    height: Math.min(600, window.innerWidth, window.innerHeight),
+    width: window.innerWidth,
+    height: window.innerHeight,
   }
 
   const cursor = {
@@ -17,6 +17,26 @@ export const setupScene = (canvasElement: HTMLCanvasElement) => {
   window.addEventListener("mousemove", (event: MouseEvent) => {
     cursor.x = event.clientX / sizes.width - 0.5
     cursor.y = -(event.clientY / sizes.height - 0.5)
+  })
+
+  window.addEventListener("resize", () => {
+    // Update sizes
+    sizes.width = window.innerWidth
+    sizes.height = window.innerHeight
+
+    // Update camera
+    camera.aspect = sizes.width / sizes.height
+    camera.updateProjectionMatrix()
+
+    // Update renderer
+    renderer.setSize(sizes.width, sizes.height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  })
+
+  window.addEventListener("dblclick", () => {
+    document.fullscreenElement
+      ? document.exitFullscreen()
+      : canvasElement.requestFullscreen()
   })
 
   // Objects
@@ -45,20 +65,15 @@ export const setupScene = (canvasElement: HTMLCanvasElement) => {
 
   const controls = new OrbitControls(camera, canvasElement)
   controls.enableDamping = true
-  controls.update()
 
   // renderer
   const renderer = new THREE.WebGLRenderer({
     canvas: canvasElement,
   })
   renderer.setSize(sizes.width, sizes.height)
-  renderer.render(scene, camera)
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
-  window.addEventListener("resize", () => {
-    sizes.width = Math.min(800, window.innerWidth)
-    sizes.height = Math.min(600, window.innerHeight)
-    renderer.setSize(sizes.width, sizes.height)
-  })
+  renderer.render(scene, camera)
 
   const tick = () => {
     controls.update()
