@@ -40,15 +40,26 @@ export const setupScene = (canvasElement: HTMLCanvasElement) => {
   })
 
   // Objects
-  const cube = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial({ color: 0xff0000 })
-  )
-  scene.add(cube)
+
+  const geometry = new THREE.BufferGeometry()
+  const count = 100
+  const vertices = new Float32Array(count * 3 * 3)
+  for (let i = 0; i < count * 3 * 3; i++) {
+    vertices[i] = Math.random() - 0.5
+  }
+  const positionAttribute = new THREE.BufferAttribute(vertices, 3)
+  geometry.setAttribute("position", positionAttribute)
+  const material = new THREE.MeshBasicMaterial({
+    color: 0x00ff00,
+    wireframe: true,
+  })
+
+  const mesh = new THREE.Mesh(geometry, material)
+  scene.add(mesh)
 
   // helper
-  const axesHelper = new THREE.AxesHelper()
-  scene.add(axesHelper)
+  // const axesHelper = new THREE.AxesHelper()
+  // scene.add(axesHelper)
 
   // camera
   const camera = new THREE.PerspectiveCamera(
@@ -59,7 +70,7 @@ export const setupScene = (canvasElement: HTMLCanvasElement) => {
   )
 
   camera.position.z = 3
-  camera.lookAt(cube.position)
+  camera.lookAt(mesh.position)
 
   scene.add(camera)
 
