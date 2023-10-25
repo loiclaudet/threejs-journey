@@ -1,5 +1,10 @@
 import * as THREE from "three"
+import gsap from "gsap"
 import { OrbitControls } from "three/addons/controls/OrbitControls.js"
+import GUI from "lil-gui"
+
+// Debug
+const gui = new GUI()
 
 export const setupScene = (canvasElement: HTMLCanvasElement) => {
   const scene = new THREE.Scene()
@@ -38,11 +43,17 @@ export const setupScene = (canvasElement: HTMLCanvasElement) => {
       ? document.exitFullscreen()
       : canvasElement.requestFullscreen()
   })
-
+  // parameters for gui and mesh
+  const parameters = {
+    color: 0xff0000,
+    spin: () => {
+      gsap.to(mesh.rotation, { duration: 1, y: mesh.rotation.y + Math.PI * 2 })
+    },
+  }
   // Objects
 
   const geometry = new THREE.BufferGeometry()
-  const count = 100
+  const count = 60
   const vertices = new Float32Array(count * 3 * 3)
   for (let i = 0; i < count * 3 * 3; i++) {
     vertices[i] = Math.random() - 0.5
@@ -50,12 +61,30 @@ export const setupScene = (canvasElement: HTMLCanvasElement) => {
   const positionAttribute = new THREE.BufferAttribute(vertices, 3)
   geometry.setAttribute("position", positionAttribute)
   const material = new THREE.MeshBasicMaterial({
-    color: 0x00ff00,
+    color: parameters.color,
     wireframe: true,
   })
 
   const mesh = new THREE.Mesh(geometry, material)
   scene.add(mesh)
+
+  // Debug
+  gui
+    .add(mesh.position, "y")
+    .min(-3)
+    .max(3)
+    .step(0.01)
+    .name("red cube elevation")
+
+  gui.add(mesh, "visible")
+  gui.add(material, "wireframe")
+
+  gui
+    .addColor(parameters, "color")
+    .onChange(() => material.color.set(parameters.color))
+    .name("cube color")
+
+  gui.add(parameters, "spin")
 
   // helper
   // const axesHelper = new THREE.AxesHelper()
