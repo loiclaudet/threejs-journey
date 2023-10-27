@@ -6,6 +6,17 @@ import GUI from "lil-gui"
 // Debug
 const gui = new GUI()
 
+// Texture
+const loadingManager = new THREE.LoadingManager()
+const textureLoader = new THREE.TextureLoader(loadingManager)
+const colorTexture = textureLoader.load("/Door_Wood_001_basecolor.jpg")
+colorTexture.rotation = Math.PI * 0.25
+colorTexture.center.x = 0.5
+colorTexture.center.y = 0.5
+colorTexture.minFilter = THREE.NearestFilter
+colorTexture.magFilter = THREE.NearestFilter
+colorTexture.generateMipmaps = false
+
 export const setupScene = (canvasElement: HTMLCanvasElement) => {
   const scene = new THREE.Scene()
 
@@ -52,17 +63,9 @@ export const setupScene = (canvasElement: HTMLCanvasElement) => {
   }
   // Objects
 
-  const geometry = new THREE.BufferGeometry()
-  const count = 60
-  const vertices = new Float32Array(count * 3 * 3)
-  for (let i = 0; i < count * 3 * 3; i++) {
-    vertices[i] = Math.random() - 0.5
-  }
-  const positionAttribute = new THREE.BufferAttribute(vertices, 3)
-  geometry.setAttribute("position", positionAttribute)
+  const geometry = new THREE.BoxGeometry(1, 1, 1)
   const material = new THREE.MeshBasicMaterial({
-    color: parameters.color,
-    wireframe: true,
+    map: colorTexture,
   })
 
   const mesh = new THREE.Mesh(geometry, material)
