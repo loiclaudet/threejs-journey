@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
@@ -14,6 +14,8 @@
     "vite": "^4.4.5"
   },
   "dependencies": {
+    "gsap": "^3.12.2",
+    "lil-gui": "^0.18.2",
     "three": "^0.157.0"
   }
 }

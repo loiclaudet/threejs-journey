@@ -1,32 +1,128 @@
 import * as THREE from "three"
+import gsap from "gsap"
+import { OrbitControls } from "three/addons/controls/OrbitControls.js"
+import GUI from "lil-gui"
+
+// Debug
+const gui = new GUI()
+
+// Texture
+const loadingManager = new THREE.LoadingManager()
+const textureLoader = new THREE.TextureLoader(loadingManager)
+const colorTexture = textureLoader.load("/Door_Wood_001_basecolor.jpg")
+colorTexture.rotation = Math.PI * 0.25
+colorTexture.center.x = 0.5
+colorTexture.center.y = 0.5
+colorTexture.minFilter = THREE.NearestFilter
+colorTexture.magFilter = THREE.NearestFilter
+colorTexture.generateMipmaps = false
 
 export const setupScene = (canvasElement: HTMLCanvasElement) => {
   const scene = new THREE.Scene()
 
-  const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial({ color: 0xff0000 })
-  )
-  scene.add(mesh)
-
   const sizes = {
     width: window.innerWidth,
-    height: Math.min(window.innerHeight, window.innerWidth),
+    height: window.innerHeight,
   }
 
-  const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height)
-  camera.position.z = 5
+  const cursor = {
+    x: 0,
+    y: 0,
+  }
+
+  window.addEventListener("mousemove", (event: MouseEvent) => {
+    cursor.x = event.clientX / sizes.width - 0.5
+    cursor.y = -(event.clientY / sizes.height - 0.5)
+  })
+
+  window.addEventListener("resize", () => {
+    // Update sizes
+    sizes.width = window.innerWidth
+    sizes.height = window.innerHeight
+
+    // Update camera
+    camera.aspect = sizes.width / sizes.height
+    camera.updateProjectionMatrix()
+
+    // Update renderer
+    renderer.setSize(sizes.width, sizes.height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  })
+
+  window.addEventListener("dblclick", () => {
+    document.fullscreenElement
+      ? document.exitFullscreen()
+      : canvasElement.requestFullscreen()
+  })
+  // parameters for gui and mesh
+  const parameters = {
+    color: 0xff0000,
+    spin: () => {
+      gsap.to(mesh.rotation, { duration: 1, y: mesh.rotation.y + Math.PI * 2 })
+    },
+  }
+  // Objects
+
+  const geometry = new THREE.BoxGeometry(1, 1, 1)
+  const material = new THREE.MeshBasicMaterial({
+    map: colorTexture,
+  })
+
+  const mesh = new THREE.Mesh(geometry, material)
+  scene.add(mesh)
+
+  // Debug
+  gui
+    .add(mesh.position, "y")
+    .min(-3)
+    .max(3)
+    .step(0.01)
+    .name("red cube elevation")
+
+  gui.add(mesh, "visible")
+  gui.add(material, "wireframe")
+
+  gui
+    .addColor(parameters, "color")
+    .onChange(() => material.color.set(parameters.color))
+    .name("cube color")
+
+  gui.add(parameters, "spin")
+
+  // helper
+  // const axesHelper = new THREE.AxesHelper()
+  // scene.add(axesHelper)
+
+  // camera
+  const camera = new THREE.PerspectiveCamera(
+    75,
+    sizes.width / sizes.height,
+    0.1,
+    100
+  )
+
+  camera.position.z = 3
+  camera.lookAt(mesh.position)
+
   scene.add(camera)
 
+  const controls = new OrbitControls(camera, canvasElement)
+  controls.enableDamping = true
+
+  // renderer
   const renderer = new THREE.WebGLRenderer({
     canvas: canvasElement,
   })
   renderer.setSize(sizes.width, sizes.height)
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
   renderer.render(scene, camera)
 
-  window.addEventListener("resize", () => {
-    sizes.width = window.innerWidth
-    sizes.height = Math.min(window.innerHeight, window.innerWidth)
-    renderer.setSize(sizes.width, sizes.height)
-  })
+  const tick = () => {
+    controls.update()
+
+    renderer.render(scene, camera)
+    requestAnimationFrame(tick)
+  }
+  tick()
 }
